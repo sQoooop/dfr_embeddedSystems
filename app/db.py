@@ -174,4 +174,4 @@ def store_artifact():
         return res
 
     else:
-        return make_response(jsonify({"message": "Reueqst body must be JSOn"}), 400)
+        return make_response(jsonify({"message": "Reueqst body must be JSOn" + res}), 400)
