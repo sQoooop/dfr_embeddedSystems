@@ -1,11 +1,7 @@
 from flask import render_template
-from app import app
+from artifacts_api import artifacts_api
 
-@app.route("/")
+@artifacts_api.route("/")
 def index():
     return render_template("index.html")
 
-
-@app.route("/about")
-def about():
-    return "<h1 style='color: red'>About</h1>"

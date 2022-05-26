@@ -1,18 +1,36 @@
+import os
+import imp
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+
 # Create app variable, init creates a module which can be imported
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = None
 
-# Import modules for entry point
-
-from app import artifacts_api
-from app import db
-from app import views
-#initialize db
+config = imp.load_source('*', os.path.realpath('config.py'))
+app.config.from_object(config)
 
 
+from app.db import db
+
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
+from app.controller.artifacts import artifacts_api
+app.register_blueprint(artifacts_api)
+
+# def init_app():
+
+   
+
+#     #initialize db
+#     return app 
+
+
+
+
+# if __name__ == "__main__":
+#     init_app().run()
 
 
 
