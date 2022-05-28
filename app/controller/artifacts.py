@@ -4,7 +4,7 @@ import json
 import os
 from urllib import response
 
-from flask import jsonify, make_response, render_template, request, Blueprint
+from flask import flash, jsonify, make_response, redirect, render_template, request, Blueprint
 from app.db import db, CollectionCycle, Host, Artifact, ArtifactSource, ArtifactType, ArtifactTypeAttributes
 from app import config
 
@@ -78,7 +78,61 @@ def upload_json_file():
     else:
         return "Soryy this is not the file we wanted"
 
+@artifacts_api.route('/upload/cycle', methods=['POST'])
+def upload_and_store():
+ 
+    data = request.get_json()
+    store_collection_cycle(data)
+    #file = request.files['file']
+    #filePath = os.path.join(config.UPLOAD_FOLDER, file.filename)
+    #file.save(filePath)
 
+    return "File  stored succsessfully!"
+
+
+def store_collection_cycle(artifact_data):
+
+        # extract cycles for esier parsing
+        #cycle = artifact_data['CollectionCycle']
+
+        # define collection Cycle object
+
+        collectionCycle = CollectionCycle(
+
+            CollectionCycleName=artifact_data['CycleName'],
+            StartDate=artifact_data['CycleStart'],
+            EndDate=artifact_data['CycleEnd']
+        )
+
+        db.session.add(collectionCycle)
+        db.session.flush()
+        # grab cycle ID so we can for Artifacts
+        cycleId = collectionCycle.id
+        artifacts = artifact_data['Artifacts']    
+        # loop through artifacts and store them.
+        for k in range(len(artifacts)):
+
+            artifact = Artifact(
+                ArtifactName=artifacts[k]['ArtifactName'],
+                ArtifactDescription=artifacts[k]['ArtifactDescription'],
+            )
+            db.session.add(artifact)
+
+        db.session.commit()
+
+        # Response
+
+        response_body = {
+
+            "name": artifact_data.get("CollectionCycleName"),
+            "Start": artifact_data.get("CollectionCycleStart"),
+            "End": artifact_data.get("CollectionCycleEnd"),
+            "message": "JSON received!"
+        }
+        res = make_response(jsonify(response_body), 300)
+        return res
+
+     
 @artifacts_api.route("/artifacts", methods=['POST'])
 def store_artifact():
 
@@ -87,7 +141,7 @@ def store_artifact():
         artifact_data = request.get_json()
 
         # extract cycles for esier parsing
-        cycles = artifact_data['CollectionCycles']
+        cycles = artifact_data['CollectionCycle']
 
         # loop through cycles and store them in db
         for i in range(len(cycles)):
@@ -151,7 +205,7 @@ def store_artifact():
 
 @artifacts_api.route('/runtimetest', methods=['POST'])
 def test_insertion_time():
-    artifact_data = request.get_json()
+    ''' artifact_data = request.get_json()
 
     name = artifact_data['name']
     tüüp = artifact_data['type']
@@ -190,7 +244,7 @@ def test_insertion_time():
 
     )
     db.session.add(source)
-    db.session.commit()
+    db.session.commit() '''
 
     return "status ok"
 

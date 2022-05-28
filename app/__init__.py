@@ -2,6 +2,8 @@ import os
 import imp
 from flask import Flask
 
+import secrets
+
 # Create app variable, init creates a module which can be imported
 app = Flask(__name__)
 db = None
@@ -19,6 +21,10 @@ with app.app_context():
 from app.controller.artifacts import artifacts_api
 app.register_blueprint(artifacts_api)
 
+
+secret = secrets.token_urlsafe(32)
+
+app.secret_key = secret
 # def init_app():
 
    

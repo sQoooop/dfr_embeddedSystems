@@ -23,10 +23,8 @@
       $('#data').DataTable({
         ajax: '/api/artifactdata',
         columns: [
-          {data: 'ArtifactName'},
-          {data: 'ArtifactDescription', searchable: false},
-          {data: 'ArtifactHost', orderable: false, searchable: false}
-    
+          {data: 'ArtifactName'}
+      
         ],
       });
     });

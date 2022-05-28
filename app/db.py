@@ -58,15 +58,14 @@ class Artifact(Base):
     ArtifactDescription = db.Column(db.String(160), nullable=False)
     ArtifactData = db.Column(BLOB, nullable=True)
 
-    ArtifactHost = db.Column(
-        db.Integer, db.ForeignKey('host.id'), nullable=False)
+    #ArtifactHost = db.Column(
+     #   db.Integer, db.ForeignKey('host.id'), nullable=False)
 
     def to_dict(self):
         return {
             'ArtifactId': self.id,
             'ArtifactName': self.ArtifactName,
             'ArtifactDescription': self.ArtifactDescription, 
-            'ArtifactHost': self.ArtifactHost
         }
 
 
