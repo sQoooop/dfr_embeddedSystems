@@ -37,25 +37,10 @@ class CollectionCycle(Base):
         }
 
 
-class Host(Base):
-    
-    HostName = db.Column(db.String(80), unique=False, nullable=False)
-    HostIP = db.Column(db.String(80), unique=False, nullable=True)
-    HostOS = db.Column(db.String(80), unique=False, nullable=True)
-    CollectionCycle = db.Column(db.Integer, db.ForeignKey(
-        'collection_cycle.id'))
-
-    def to_dict(self):
-        return {
-            'HostId': self.id,
-            'HostName': self.HostName,
-            'CollectionCycle': self.CollectionCycle
-        }
-
-
 class Artifact(Base):
     ArtifactName = db.Column(db.String(80), nullable=False)
     ArtifactDescription = db.Column(db.String(160), nullable=False)
+    ArtifactSource = db.Column(db.String(180), nullable=True)
     ArtifactData = db.Column(BLOB, nullable=True)
 
     #ArtifactHost = db.Column(
@@ -65,21 +50,12 @@ class Artifact(Base):
         return {
             'ArtifactId': self.id,
             'ArtifactName': self.ArtifactName,
-            'ArtifactDescription': self.ArtifactDescription, 
+            'ArtifactDescription': self.ArtifactDescription,
+            'ArtifactData': self.ArtifactData,
+            'ArtifactDbCreationTime': self.date_created,
+            'ArtifactDbModifiedTime': self.date_modified
         }
 
-
-class ArtifactSource(Base):
-    ArtifactSourceName = db.Column(db.String(80), unique=False, nullable=False)
-
-    ArtifactId = db.Column(db.Integer, db.ForeignKey('artifact.id'), nullable=False)
-
-    def to_dict(self):
-            return {
-        'ArtifactSourceId': self.id,
-        'ArtifactSourceName': self.ArtifactSourceName,
-        'ArtifactId': self.ArtifactId
-    }
 
 
 class ArtifactType(Base):

@@ -5,7 +5,7 @@ import os
 from urllib import response
 
 from flask import flash, jsonify, make_response, redirect, render_template, request, Blueprint
-from app.db import db, CollectionCycle, Host, Artifact, ArtifactSource, ArtifactType, ArtifactTypeAttributes
+from app.db import db, CollectionCycle, Artifact, ArtifactType, ArtifactTypeAttributes
 from app import config
 
 
@@ -26,9 +26,6 @@ def render_artifacts():
 def return_artifact_from_db():
     return {'data': [a.to_dict() for a in Artifact.query]}
 
-@artifacts_api.route("/api/hostdata")
-def return_hosts_from_db():
-    return {'hostdata': [h.to_dict() for h in Host.query]}
 
 @artifacts_api.route("/api/collectioncycledata")
 def return_ccycle_from_db():
@@ -55,9 +52,7 @@ def upload_json_file():
         file = request.files['file']
         filePath = os.path.join(config.UPLOAD_FOLDER, file.filename)
         file.save(filePath)
-        cycles = []
-        hosts= []
-        artifacts= []
+
 
         with open(filePath, 'r') as jsonFile:
             json_data = json.load(jsonFile)
@@ -205,7 +200,7 @@ def store_artifact():
 
 @artifacts_api.route('/runtimetest', methods=['POST'])
 def test_insertion_time():
-    ''' artifact_data = request.get_json()
+    artifact_data = request.get_json()
 
     name = artifact_data['name']
     tüüp = artifact_data['type']
@@ -244,7 +239,7 @@ def test_insertion_time():
 
     )
     db.session.add(source)
-    db.session.commit() '''
+    db.session.commit() 
 
     return "status ok"
 

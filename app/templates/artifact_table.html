@@ -5,8 +5,8 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Description</th>
-        <th>Host</th>
+        <th>DB_Insertin_Time</th>
+        <th>DB_Modification_Time</th>
       </tr>
     </thead>
     <tbody>
@@ -23,7 +23,9 @@
       $('#data').DataTable({
         ajax: '/api/artifactdata',
         columns: [
-          {data: 'ArtifactName'}
+          {data: 'ArtifactName'},
+          {data: 'ArtifactDbCreationTime'},
+          {data: 'ArtifactDbModifiedTime'}
       
         ],
       });
