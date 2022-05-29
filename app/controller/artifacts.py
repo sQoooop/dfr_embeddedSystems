@@ -75,6 +75,7 @@ def upload_json_file():
 
 @artifacts_api.route('/upload/cycle', methods=['POST'])
 def upload_and_store():
+    print("sali")
  
     data = request.get_json()
     store_collection_cycle(data)
@@ -88,7 +89,6 @@ def upload_and_store():
 def store_collection_cycle(artifact_data):
 
         # extract cycles for esier parsing
-        #cycle = artifact_data['CollectionCycle']
 
         # define collection Cycle object
 
@@ -112,8 +112,36 @@ def store_collection_cycle(artifact_data):
                 ArtifactDescription=artifacts[k]['ArtifactDescription'],
             )
             db.session.add(artifact)
+            db.session.flush()
+
+            artifactId = artifact.id
+
+            artifactType = ArtifactType(
+                ArtifactTypeName = artifacts[k]['ArtifactType'],
+                ArtifactId = artifactId
+            )
+            db.session.add(artifactType)
+            db.session.flush()
+            artifactTypeid = artifactType.id
+
+            artifactAttributes = artifacts[k]['ArtifactTypeAttributes']
+            print(artifactAttributes)
+
+            attributeKeys = artifactAttributes.keys()
+            attributeValues = artifactAttributes.values()
+
+            print(attributeKeys)
+            print(attributeValues)
+            for t in artifactAttributes:
+                attribute = ArtifactTypeAttributes(
+                    ArtifactTypeId = artifactTypeid,
+                    ArtifactTypeAttributeName = t,                  
+                    ArtifactTypeAttributeValue = artifactAttributes[t]
+                )
+                db.session.add(attribute)
 
         db.session.commit()
+            
 
         # Response
 

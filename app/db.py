@@ -56,8 +56,6 @@ class Artifact(Base):
             'ArtifactDbModifiedTime': self.date_modified
         }
 
-
-
 class ArtifactType(Base):
     ArtifactTypeName = db.Column(db.String(80), unique=False, nullable=False)
     ArtifactId = db.Column(db.Integer, db.ForeignKey('artifact.id'), nullable=False)
@@ -72,8 +70,8 @@ class ArtifactType(Base):
 
 
 class ArtifactTypeAttributes(Base):
-    ArtifactTypeAttributeName = db.Column(db.String(80), unique=True, nullable=False)
-    ArtifactTypeAttributeValue = db.Column(db.String(80), unique=True, nullable=False)
+    ArtifactTypeAttributeName = db.Column(db.String(80), unique=False, nullable=False)
+    ArtifactTypeAttributeValue = db.Column(db.String(80), unique=False, nullable=False)
 
     ArtifactTypeId = db.Column(db.Integer, db.ForeignKey(
         'artifact_type.id'), nullable=False)
