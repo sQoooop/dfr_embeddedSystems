@@ -27,6 +27,7 @@ class CollectionCycle(Base):
     CollectionCycleName = db.Column(db.String(80), nullable=False)
     StartDate = db.Column(db.String(80), nullable=True)
     EndDate = db.Column(db.String(80), nullable=True)
+    InvestigationId = db.Column(db.String(80), nullable=True)
     CollectionCycleType = db.Column(db.String(80), nullable=True)
 
     def to_dict(self):
@@ -40,7 +41,10 @@ class CollectionCycle(Base):
 class Artifact(Base):
     ArtifactName = db.Column(db.String(80), nullable=False)
     ArtifactDescription = db.Column(db.String(160), nullable=False)
-    ArtifactSource = db.Column(db.String(180), nullable=True)
+    ArtifactCycle = db.Column(db.Integer, db.ForeignKey(
+        'collection_cycle.id'), nullable=False)
+    ArtifactIntegrityHash = db.Column(db.String(80), nullable=True)
+    
     ArtifactData = db.Column(BLOB, nullable=True)
 
     #ArtifactHost = db.Column(
@@ -48,13 +52,14 @@ class Artifact(Base):
 
     def to_dict(self):
         return {
-            'ArtifactId': self.id,
             'ArtifactName': self.ArtifactName,
             'ArtifactDescription': self.ArtifactDescription,
             'ArtifactData': self.ArtifactData,
-            'ArtifactDbCreationTime': self.date_created,
-            'ArtifactDbModifiedTime': self.date_modified
+            'ArtifactIntegrityHash': self.ArtifactIntegrityHash,
+            'ArtifactDbCreationTime': str(self.date_created),
+            'ArtifactDbModifiedTime': str(self.date_modified)
         }
+
 
 class ArtifactType(Base):
     ArtifactTypeName = db.Column(db.String(80), unique=False, nullable=False)
@@ -63,11 +68,10 @@ class ArtifactType(Base):
 
     def to_dict(self):
             return {
-        'ArtifactTypeId': self.id,
         'ArtifactTypeName': self.ArtifactTypeName,
-        'ArtifactId': self.ArtifactId
     }
 
+   
 
 class ArtifactTypeAttributes(Base):
     ArtifactTypeAttributeName = db.Column(db.String(80), unique=False, nullable=False)
@@ -78,10 +82,8 @@ class ArtifactTypeAttributes(Base):
 
     def to_dict(self):
             return {
-        'ArtifactTypeattributeId': self.id,
         'ArtifactTypeAttributeName': self.ArtifactTypeAttributeName,
         'ArtifactTypeAttributeValue': self.ArtifactTypeAttributeValue,
-        'ArtifactTypeId': self.ArtifactTypeId
     }
     
 

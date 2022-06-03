@@ -4,7 +4,7 @@ import json
 import os
 from urllib import response
 
-from flask import flash, jsonify, make_response, redirect, render_template, request, Blueprint
+from flask import flash, jsonify, make_response, redirect, render_template, request, Blueprint, session
 from app.db import db, CollectionCycle, Artifact, ArtifactType, ArtifactTypeAttributes
 from app import config
 
@@ -24,14 +24,12 @@ def render_artifacts():
 # ArtifactData for table
 @artifacts_api.route("/api/artifactdata")
 def return_artifact_from_db():
-    return {'data': [a.to_dict() for a in Artifact.query]}
-
+    return {'data': [a.to_dict() for a in Artifact.query.all()]}
+# 
 
 @artifacts_api.route("/api/collectioncycledata")
 def return_ccycle_from_db():
     return {'cycledata': [c.to_dict() for c in CollectionCycle.query]}
-
-
 
 # Basic get for artifacts
 @artifacts_api.route("/artifact/list")
@@ -42,6 +40,34 @@ def return_artifacts():
 @artifacts_api.route("/collectioncycle/list")
 def return_collection():
     return jsonify([c.to_dict() for c in CollectionCycle.query.all()])
+
+@artifacts_api.route("/atype/list")
+def return_artifact_Types():
+    return 
+
+@artifacts_api.route("/atypeattribute/list")
+def return_artifact_Type_Attributes():
+    completeData = {}
+    artifacts = Artifact.query.order_by(Artifact.id.asc()).all()
+    for a in artifacts:
+        types = ArtifactType.query.filter_by(ArtifactId = a.id).all()
+        for t in types:
+            attributes = ArtifactTypeAttributes.query.filter_by(ArtifactTypeId = t.id).all()
+            attrHelper = {}
+            for at in attributes:
+                attributeId = "attributeid" + str(at.id)
+                attrHelper[attributeId] = at.to_dict()
+
+    
+        data = {"artifact": a.to_dict(), "types": t.to_dict()}
+        data["types"]["attributes"] = attrHelper
+
+        artId = "artifact" + str(a.id)
+     
+        completeData[artId] = data 
+
+    
+    return jsonify(completeData)
 
 
 # Processing a JSON objects File sent to the API
@@ -78,6 +104,7 @@ def upload_and_store():
     print("sali")
  
     data = request.get_json()
+    print(data)
     store_collection_cycle(data)
     #file = request.files['file']
     #filePath = os.path.join(config.UPLOAD_FOLDER, file.filename)
@@ -85,24 +112,25 @@ def upload_and_store():
 
     return "File  stored succsessfully!"
 
-
 def store_collection_cycle(artifact_data):
 
         # extract cycles for esier parsing
-
         # define collection Cycle object
 
         collectionCycle = CollectionCycle(
 
             CollectionCycleName=artifact_data['CycleName'],
             StartDate=artifact_data['CycleStart'],
-            EndDate=artifact_data['CycleEnd']
+            EndDate=artifact_data['CycleEnd'],
+            CollectionCycleType=artifact_data['CycleType']
         )
 
         db.session.add(collectionCycle)
         db.session.flush()
         # grab cycle ID so we can for Artifacts
         cycleId = collectionCycle.id
+
+        # Grab Artifacts
         artifacts = artifact_data['Artifacts']    
         # loop through artifacts and store them.
         for k in range(len(artifacts)):
@@ -110,12 +138,14 @@ def store_collection_cycle(artifact_data):
             artifact = Artifact(
                 ArtifactName=artifacts[k]['ArtifactName'],
                 ArtifactDescription=artifacts[k]['ArtifactDescription'],
+                ArtifactCycle=cycleId
             )
             db.session.add(artifact)
             db.session.flush()
 
             artifactId = artifact.id
 
+            # Store Artifact Type
             artifactType = ArtifactType(
                 ArtifactTypeName = artifacts[k]['ArtifactType'],
                 ArtifactId = artifactId
@@ -124,14 +154,10 @@ def store_collection_cycle(artifact_data):
             db.session.flush()
             artifactTypeid = artifactType.id
 
+            # get attribute object
             artifactAttributes = artifacts[k]['ArtifactTypeAttributes']
-            print(artifactAttributes)
-
-            attributeKeys = artifactAttributes.keys()
-            attributeValues = artifactAttributes.values()
-
-            print(attributeKeys)
-            print(attributeValues)
+            
+            # Store attribute Names and values
             for t in artifactAttributes:
                 attribute = ArtifactTypeAttributes(
                     ArtifactTypeId = artifactTypeid,
@@ -231,42 +257,34 @@ def test_insertion_time():
     artifact_data = request.get_json()
 
     name = artifact_data['name']
-    tüüp = artifact_data['type']
+    artifactType = artifact_data['type']
     source = artifact_data['source']
+    artifactHash = artifact_data['hash']
 
     collectionCycle = CollectionCycle(
-        CollectionCycleName="Lustig hahahaha"
+        CollectionCycleName="TestCycle"
     )
     db.session.add(collectionCycle)
     db.session.flush()
-
-    
-    host = Host(HostName= "Der Host", CollectionCycle=collectionCycle.id)
-    db.session.add(host)
-    db.session.flush()
+    cycleId = collectionCycle.id
 
     artifact = Artifact(
         ArtifactName = name,
         ArtifactDescription = "test",
-        ArtifactHost = host.id
+        ArtifactCycle=cycleId,
+        ArtifactIntegrityHash= artifactHash
     )
         
     db.session.add(artifact)
     db.session.flush()
 
-    tüüüüp = ArtifactType(
-        ArtifactTypeName = tüüp,
+    artType = ArtifactType(
+        ArtifactTypeName = artifactType,
         ArtifactId = artifact.id,
         ArtifactCollectionTime = artifact.date_created
     )
-    db.session.add(tüüüüp)
+    db.session.add(artType)
 
-    source = ArtifactSource(
-        ArtifactSourceName = source,
-        ArtifactId = artifact.id,
-
-    )
-    db.session.add(source)
     db.session.commit() 
 
     return "status ok"
