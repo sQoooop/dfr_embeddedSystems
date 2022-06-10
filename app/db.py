@@ -28,15 +28,16 @@ class CollectionCycle(Base):
     StartDate = db.Column(db.String(80), nullable=True)
     EndDate = db.Column(db.String(80), nullable=True)
     InvestigationId = db.Column(db.String(80), nullable=True)
+    ArtifactCount = db.Column(db.Integer, nullable=True)
     CollectionCycleType = db.Column(db.String(80), nullable=True)
 
     def to_dict(self):
         return {
             'CollectionCycleName': self.CollectionCycleName,
             'CollectionCycleStart': self.StartDate,
-            'CollectionCycleEnd': self.EndDate
+            'CollectionCycleEnd': self.EndDate,
+            'ArtifactCount': self.ArtifactCount
         }
-
 
 class Artifact(Base):
     ArtifactName = db.Column(db.String(80), nullable=False)
@@ -44,22 +45,18 @@ class Artifact(Base):
     ArtifactCycle = db.Column(db.Integer, db.ForeignKey(
         'collection_cycle.id'), nullable=False)
     ArtifactIntegrityHash = db.Column(db.String(80), nullable=True)
-    
-    ArtifactData = db.Column(BLOB, nullable=True)
-
-    #ArtifactHost = db.Column(
-     #   db.Integer, db.ForeignKey('host.id'), nullable=False)
+    ArtifactHost = db.Column(db.String(80), nullable=True) 
+    ArtifactData = db.Column(db.String(80), nullable=True)
 
     def to_dict(self):
         return {
             'ArtifactName': self.ArtifactName,
             'ArtifactDescription': self.ArtifactDescription,
             'ArtifactData': self.ArtifactData,
+            'ArtifactHost': self.ArtifactHost,
             'ArtifactIntegrityHash': self.ArtifactIntegrityHash,
-            'ArtifactDbCreationTime': str(self.date_created),
             'ArtifactDbModifiedTime': str(self.date_modified)
         }
-
 
 class ArtifactType(Base):
     ArtifactTypeName = db.Column(db.String(80), unique=False, nullable=False)
@@ -83,11 +80,7 @@ class ArtifactTypeAttributes(Base):
     def to_dict(self):
             return {
         'ArtifactTypeAttributeName': self.ArtifactTypeAttributeName,
-        'ArtifactTypeAttributeValue': self.ArtifactTypeAttributeValue,
+        'ArtifactTypeAttributeValue': self.ArtifactTypeAttributeValue
     }
     
 
-
-
-## Method to Store one or multiple CollectionCycles to the DB. CollectionCycles are represetned as JSON - Object.
-## {"CollectionCycle":[{"Hostname":1, "HostOs": CentOS, "Artifacts":[{"ArtifactName" : 1}, {"ArtifactName" : 2}]}}, {"Hostname":2, "HostOs": RaspbianBuster, "Artifacts":[{"ArtifactName" : 1}, {"ArtifactName" : 2}]}]}
