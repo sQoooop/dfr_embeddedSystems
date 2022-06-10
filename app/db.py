@@ -17,12 +17,6 @@ class Base(db.Model):
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
-
-
-## TODO: 1. Check Unique fields --> constraints in general
-##       2. Check Insert logic and O(n) rn you loop thorugh everything O(n)^3 (performance check)
-#        3. Check db initialization --> maybe ask Thierry
-#   
 class CollectionCycle(Base):
     CollectionCycleName = db.Column(db.String(80), nullable=False)
     StartDate = db.Column(db.String(80), nullable=True)
@@ -67,8 +61,6 @@ class ArtifactType(Base):
             return {
         'ArtifactTypeName': self.ArtifactTypeName,
     }
-
-   
 
 class ArtifactTypeAttributes(Base):
     ArtifactTypeAttributeName = db.Column(db.String(80), unique=False, nullable=False)

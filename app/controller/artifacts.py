@@ -1,10 +1,8 @@
 from ctypes import POINTER
 from fileinput import filename
-import json
-import os
+
 from typing import Collection
 from urllib import response
-
 from flask import flash, jsonify, make_response, redirect, render_template, request, Blueprint, session
 from app.db import db, CollectionCycle, Artifact, ArtifactType, ArtifactTypeAttributes
 from app import config
@@ -58,33 +56,6 @@ def return_artifact_Type_Attributes():
     return jsonify(completeData)
 
 
-#  This is a test Methode for Processing a JSON objects File sent to the API
-@artifacts_api.route("/upload/artifacts", methods=['GET', 'POST'])
-def upload_json_file():
-    if request.method == 'POST':
-
-        file = request.files['file']
-        filePath = os.path.join(config.UPLOAD_FOLDER, file.filename)
-        file.save(filePath)
-
-
-        with open(filePath, 'r') as jsonFile:
-            json_data = json.load(jsonFile)
-
-            for cycle in json_data['CollectionCycles']:
-                print(cycle.get('name'))
-                print(cycle.get('dateStart'))
-                for host in cycle['Hosts']:
-                    print(host.get('HostName'))
-                    print(host.get('HostIP'))
-
-                    for artifact in host['HostArtifacts']:
-                        print(artifact.get('ArtifactName'))
-      
-        return "File " + file.filename + " stored succsessfully!"
-    else:
-        return "Soryy this is not the file we wanted"
-
 # API to upload collection Cycles with artefacts.
 @artifacts_api.route('/upload/cycle', methods=['POST'])
 def upload_and_store(): 
@@ -93,6 +64,8 @@ def upload_and_store():
     store_collection_cycle(data)
 
     return "File  stored succsessfully!"
+
+
 # Method to store collection cycle an the Artifacts contained in it.
 def store_collection_cycle(artifact_data):
         # define collection Cycle object
@@ -219,7 +192,6 @@ def store_artifact():
             db.session.commit()
 
         # Response
-
         response_body = {
 
             "name": artifact_data.get("CollectionCycleName"),
@@ -237,7 +209,7 @@ def store_artifact():
 # Method to store artifacts for Insertiontest
 @artifacts_api.route('/runtimetest', methods=['POST'])
 def test_insertion_time():
-    ''' artifact_data = request.get_json()
+    artifact_data = request.get_json()
 
     name = artifact_data['name']
     artifactType = artifact_data['type']
@@ -268,38 +240,7 @@ def test_insertion_time():
     )
     db.session.add(artType)
 
-    db.session.commit()  '''
+    db.session.commit() 
 
     return "status ok"
 
-
-@artifacts_api.route('/cycle', methods=['GET', 'POST'])
-def store_cycle_file():
-    if request.method == 'POST':
-    
-        file = request.files['file']
-        filePath = os.path.join(config.UPLOAD_FOLDER, file.filename)
-        file.save(filePath)
-
-        with open (filePath, 'r') as jsonFile:
-            json_data = json.load(jsonFile)
-
-            cycleName = json_data['CycleName']
-            cycleStart = json_data['CycleStart']
-            cycleType = json_data['CycleType']
-
-            artifactName = json_data['Artifacts'][0]['ArtifactName']
-            artifactType = json_data['Artifacts'][0]['ArtifactType']
-            artifactData = json_data['Artifacts'][0]['ArtifactData']
-
-            artifact = Artifact(
-                ArtifactName=artifactName,
-                ArtifactDescription=artifactType,
-                ArtifactData=artifactData,
-                ArtifactHost=1
-            )
-            db.session.add(artifact)
-            db.session.commit()
-
-            
-    return "hello myfriend"
